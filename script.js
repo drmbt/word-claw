@@ -260,6 +260,9 @@ document.addEventListener("DOMContentLoaded", () => {
         let bestCandidate = null;
         let minDist = 9999;
 
+        const impactRadius = 150; // Radius within which words will scatter
+        const maxScatterForce = 60; // Max pixels to push a word
+
         state.gameWords.forEach(w => {
             if (w.grabbed) return;
             const wRect = w.el.getBoundingClientRect();
@@ -270,14 +273,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const dx = Math.abs(wCenterX - clawGrabX);
             const dy = Math.abs(wCenterY - clawGrabY);
+            const dist = Math.sqrt(dx * dx + dy * dy);
 
+            // 1. Check for Grab Candidate
             // Generous hitbox for dense piles
             if (dx < wRect.width / 2 + 25 && dy < wRect.height / 2 + 35) {
-                const dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < minDist) {
                     minDist = dist;
                     bestCandidate = w;
                 }
+            }
+
+            // 2. Apply Scatter Physics to all words in radius (including the one about to be grabbed, which we'll pull back later if needed, but easier to just apply to all then override grabbed obj)
+            if (dist < impactRadius && dist > 0) {
+                // Calculate push vector
+                const angle = Math.atan2(wCenterY - clawGrabY, wCenterX - clawGrabX);
+                // Inverse distance force (closer words get pushed more)
+                const force = maxScatterForce * (1 - (dist / impactRadius));
+
+                // Add jitter to scattering
+                const jitterRot = (Math.random() - 0.5) * 90;
+                w.rot += jitterRot;
+
+                // Calculate new position
+                let newX = w.x + Math.cos(angle) * force;
+                let newY = w.y + Math.sin(angle) * force;
+
+                // Keep within pit bounds
+                if (newX < 0) newX = 0;
+                if (newX > pitRect.width - w.w) newX = pitRect.width - w.w;
+                if (newY < 0) newY = 0;
+                if (newY > pitRect.height - w.h) newY = pitRect.height - w.h;
+
+                w.x = newX;
+                w.y = newY;
+
+                // Apply visual transition
+                w.el.style.transition = 'left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), top 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s ease-out';
+                w.el.style.left = `${w.x}px`;
+                w.el.style.top = `${w.y}px`;
+                w.el.style.transform = `rotate(${w.rot}deg)`;
+
+                // Clean up transition so it doesn't mess with purely draggable logic later or future updates
+                setTimeout(() => {
+                    if (w.el) w.el.style.transition = 'none';
+                }, 400);
             }
         });
 
@@ -285,6 +325,8 @@ document.addEventListener("DOMContentLoaded", () => {
             state.grabbedWord = bestCandidate;
             bestCandidate.grabbed = true;
             bestCandidate.el.classList.add('grabbed');
+            // Remove scatter transition immediately to prevent conflicts with retracting logic
+            bestCandidate.el.style.transition = 'none';
         }
     }
 
