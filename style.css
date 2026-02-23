@@ -367,6 +367,19 @@ section {
     box-shadow: 0 0 0 #9e004f, 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 4px 10px rgba(0, 0, 0, 0.8);
 }
 
+.keyboard-hints {
+    font-family: var(--font-arcade);
+    color: var(--neon-cyan);
+    font-size: 0.6rem;
+    margin-top: 10px;
+    letter-spacing: 1px;
+    opacity: 0.8;
+}
+
+.keyboard-hints span {
+    text-shadow: 0 0 5px var(--neon-cyan);
+}
+
 /* --- Poetry Terminal (Right) --- */
 .comp-header {
     margin-bottom: 1.5rem;

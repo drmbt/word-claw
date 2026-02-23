@@ -159,11 +159,59 @@ document.addEventListener("DOMContentLoaded", () => {
                 }, Math.random() * 500); // stagger drops
             }
         }
+
+        // Word Cap Mechanism: Remove oldest words if over 200
+        if (state.gameWords.length > 200) {
+            const toRemove = state.gameWords.length - 200;
+            let removedCount = 0;
+            const remainingWords = [];
+
+            for (let i = 0; i < state.gameWords.length; i++) {
+                const w = state.gameWords[i];
+                if (removedCount < toRemove && !w.grabbed && !w.displaced) {
+                    // Fall away
+                    w.el.style.transition = 'top 1s cubic-bezier(0.5, 0, 1, 1), opacity 0.5s 0.5s';
+                    w.el.style.top = `${pitRect.height + 200}px`;
+                    w.el.style.opacity = '0';
+                    setTimeout(() => { if (w.el) w.el.remove(); }, 1000);
+                    removedCount++;
+                } else {
+                    remainingWords.push(w);
+                }
+            }
+            state.gameWords = remainingWords;
+        }
     }
 
     initWords();
 
     // --- Claw Controls ---
+    let keysDown = {};
+
+    function updateClawPositionLoop() {
+        if (state.clawMode === 'idle') {
+            const speed = 6;
+            let move = 0;
+            if (keysDown['ArrowLeft'] || keysDown['KeyA']) move -= speed;
+            if (keysDown['ArrowRight'] || keysDown['KeyD']) move += speed;
+
+            if (move !== 0) {
+                const rect = gameWindow.getBoundingClientRect();
+                const carriageWidth = 40;
+                let relX = state.clawX + move;
+
+                if (relX < carriageWidth / 2) relX = carriageWidth / 2;
+                if (relX > rect.width - carriageWidth / 2) relX = rect.width - carriageWidth / 2;
+
+                state.clawTargetX = relX;
+                clawCarriage.style.left = `${relX}px`;
+                state.clawX = relX;
+            }
+        }
+        requestAnimationFrame(updateClawPositionLoop);
+    }
+    requestAnimationFrame(updateClawPositionLoop);
+
     gameWindow.addEventListener('mousemove', (e) => {
         if (state.clawMode !== 'idle') return;
 
@@ -189,12 +237,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     btnDrop.addEventListener('click', handleClawTrigger);
 
-    // Allow spacebar anywhere
+    // Global keyboard
     document.addEventListener('keydown', (e) => {
-        if (e.code === 'Space') {
+        keysDown[e.code] = true;
+
+        if (e.code === 'Space' || e.code === 'Enter') {
+            // Only trigger claw if we aren't focused on a word in the inventory
+            if (document.activeElement && document.activeElement.classList.contains('magnetic-word')) {
+                return; // let the word handle it
+            }
             e.preventDefault(); // stop scrolling
             handleClawTrigger();
         }
+    });
+
+    document.addEventListener('keyup', (e) => {
+        keysDown[e.code] = false;
     });
 
     gameWindow.addEventListener('mousedown', (e) => {
@@ -488,6 +546,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const trashZone = document.getElementById('trash-zone');
 
     function setupDragAndDrop(el) {
+        el.tabIndex = 0; // Make focusable for keyboard navigation
+
+        el.addEventListener('keydown', (e) => {
+            if (e.code === 'Enter' || e.code === 'Space') {
+                e.preventDefault();
+                // Send word to the center of the comp board if activated via keyboard
+                if (el.parentElement === inventoryBelt) {
+                    compBoard.appendChild(el);
+                    const boardRect = compBoard.getBoundingClientRect();
+                    // Slight random stagger so they don't exactly stack perfectly if multiple dropped
+                    let x = boardRect.width / 2 - 40 + (Math.random() * 60 - 30);
+                    let y = boardRect.height / 2 - 20 + (Math.random() * 60 - 30);
+
+                    el.style.left = `${x}px`;
+                    el.style.top = `${y}px`;
+                }
+            }
+        });
+
         el.addEventListener('mousedown', (e) => {
             if (e.button !== 0) return; // Only left click
             e.preventDefault(); // prevent text selection
