@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Claw - Poetry Arcade</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- Left Side: Claw Machine Arcade -->
+        <section class="arcade-panel">
+            <div class="arcade-cabinet">
+                <header class="arcade-header">
+                    <h1 class="neon-text pink-glow">WORD CLAW</h1>
+                    <div class="credit-display neon-text blue-glow">INSERT CREDIT TO PLAY</div>
+                </header>
+                
+                <div class="game-window-frame">
+                    <div class="game-window" id="game-window">
+                        <!-- The Claw Mechanism -->
+                        <div class="claw-gantry" id="claw-gantry">
+                            <div class="claw-carriage" id="claw-carriage">
+                                <div class="claw-arm" id="claw-arm"></div>
+                                <div class="claw-grabber" id="claw-grabber">
+                                    <div class="prong left-prong"></div>
+                                    <div class="prong right-prong"></div>
+                                    <div class="grabber-center"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Physics Area for Random Words -->
+                        <div class="word-pit" id="word-pit">
+                            <!-- Words injected dynamically here -->
+                        </div>
+                        
+                        <!-- Prize Delivery Chute -->
+                        <div class="prize-chute" id="prize-chute">
+                            <div class="chute-hole"></div>
+                            <div class="chute-label">PRIZE</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arcade-controls">
+                    <div class="joystick-hint">◀ MOUSE TO MOVE ▶</div>
+                    <button class="arcade-btn drop-btn" id="btn-drop">DROP CLAW</button>
+                    <!-- <button class="arcade-btn mix-btn" id="btn-mix">JUMBLE</button> -->
+                </div>
+            </div>
+        </section>
+        
+        <!-- Right Side: Composition Board -->
+        <section class="composition-panel">
+            <header class="comp-header">
+                <h2 class="neon-text purple-glow">POETRY TERMINAL</h2>
+            </header>
+            
+            <div class="inventory-section">
+                <h3 class="section-title">RETRIEVED WORDS</h3>
+                <div class="inventory-belt" id="inventory-belt">
+                    <div class="inventory-hint">Deliver words to the prize chute to access them here.</div>
+                    <!-- Captured words will appear here -->
+                </div>
+            </div>
+            
+            <div class="canvas-section">
+                <h3 class="section-title">COMPOSITION CANVAS</h3>
+                <div class="composition-board" id="composition-board">
+                    <!-- Words are dragged here to build poems -->
+                    <div class="trash-zone" id="trash-zone">
+                        <div class="trash-icon">⚠ TRASH</div>
+                        <div class="trash-overlay"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comp-controls">
+                <button class="comp-btn" id="btn-clear-canvas">CLEAR BOARD</button>
+                <button class="comp-btn" id="btn-export">EXPORT</button>
+            </div>
+        </section>
+        
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

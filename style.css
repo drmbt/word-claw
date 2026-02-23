@@ -1,0 +1,557 @@
+:root {
+    /* Color Palette - Synthwave / Cyberpunk */
+    --bg-darkest: #05050A;
+    --bg-panel: #12101e;
+    --bg-window: #0c1821;
+    --neon-pink: #ff007f;
+    --neon-blue: #00f3ff;
+    --neon-purple: #9d00ff;
+    --neon-green: #39ff14;
+    --text-light: #e0e6ed;
+    --text-dim: #8a9bb2;
+    --arcade-orange: #ff7f00;
+
+    /* Fonts */
+    --font-arcade: 'Orbitron', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+    --font-serif: 'Georgia', 'Times New Roman', serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-darkest);
+    color: var(--text-light);
+    font-family: var(--font-mono);
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+    /* Prevent text selection dragging */
+}
+
+/* --- Layout --- */
+.app-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+}
+
+section {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+}
+
+.arcade-panel {
+    border-right: 2px solid var(--neon-purple);
+    background: linear-gradient(180deg, var(--bg-darkest) 0%, #1a0b2e 100%);
+    box-shadow: inset -5px 0 20px rgba(157, 0, 255, 0.2);
+}
+
+.composition-panel {
+    background: linear-gradient(180deg, #0a1128 0%, var(--bg-darkest) 100%);
+    box-shadow: inset 5px 0 20px rgba(0, 243, 255, 0.1);
+}
+
+/* --- Typography & Glows --- */
+.neon-text {
+    font-family: var(--font-arcade);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.pink-glow {
+    color: #fff;
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px var(--neon-pink), 0 0 40px var(--neon-pink), 0 0 80px var(--neon-pink);
+}
+
+.blue-glow {
+    color: #fff;
+    text-shadow: 0 0 5px #fff, 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+}
+
+.purple-glow {
+    color: #fff;
+    text-shadow: 0 0 5px #fff, 0 0 10px var(--neon-purple), 0 0 20px var(--neon-purple);
+}
+
+/* --- Arcade Cabinet (Left) --- */
+.arcade-cabinet {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: var(--bg-panel);
+    border: 4px solid #2a2a35;
+    border-radius: 12px 12px 0 0;
+    padding: 1rem;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.arcade-header {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.arcade-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.credit-display {
+    font-size: 0.9rem;
+    animation: blink 1.5s infinite alternate;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.game-window-frame {
+    flex: 1;
+    border: 8px solid #333;
+    border-radius: 8px;
+    background-color: #000;
+    position: relative;
+    padding: 2px;
+    box-shadow: 0 0 15px var(--neon-purple), inset 0 0 10px #000;
+}
+
+.game-window {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, #1b263b, #0d1b2a);
+    position: relative;
+    overflow: hidden;
+    /* Grid background effect */
+    background-image: linear-gradient(rgba(0, 243, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 243, 255, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+/* Claw Mechanism */
+.claw-gantry {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background: #444;
+    border-bottom: 2px solid #555;
+    z-index: 10;
+}
+
+.claw-carriage {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    /* Will be driven by JS */
+    width: 40px;
+    height: 20px;
+    background: #666;
+    transform: translateX(-50%);
+    border-radius: 0 0 4px 4px;
+    z-index: 10;
+    transition: left 0.05s linear;
+    /* Smooth mouse tracking */
+}
+
+.claw-arm {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 300px;
+    /* Will be driven by JS drop animation */
+    background: repeating-linear-gradient(0deg,
+            #888,
+            #888 10px,
+            #666 10px,
+            #666 20px);
+    transform-origin: top center;
+    transition: height 0.05s linear;
+}
+
+.claw-grabber {
+    position: absolute;
+    bottom: -30px;
+    /* Attach to bottom of arm */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 40px;
+}
+
+.grabber-center {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 15px;
+    background: #777;
+    border-radius: 2px;
+}
+
+.prong {
+    position: absolute;
+    top: 10px;
+    width: 8px;
+    height: 35px;
+    background: silver;
+    transform-origin: top center;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.left-prong {
+    left: 5px;
+    transform: rotate(30deg);
+    border-radius: 0 0 0 8px;
+}
+
+.right-prong {
+    right: 5px;
+    transform: rotate(-30deg);
+    border-radius: 0 0 8px 0;
+}
+
+/* When claw closes */
+.claw-grabber.closed .left-prong {
+    transform: rotate(5deg);
+}
+
+.claw-grabber.closed .right-prong {
+    transform: rotate(-5deg);
+}
+
+/* Word Pit & Elements */
+.word-pit {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60%;
+    /* No bg, just a container */
+}
+
+/* The actual words in the arcade */
+.arcade-word {
+    position: absolute;
+    padding: 2px 6px;
+    background: #000;
+    color: #fff;
+    font-family: var(--font-serif);
+    font-weight: normal;
+    /* Remove borders for cut paper look */
+    /* Transform to be handled by JS */
+    cursor: default;
+    z-index: 5;
+    mix-blend-mode: screen;
+    /* Helps them overlap nicely */
+    pointer-events: none;
+    /* Let CSS logic handle just display, JS hitbounds */
+}
+
+.arcade-word.grabbed {
+    z-index: 50;
+    color: var(--neon-green);
+    /* Bring to front, light outline to show it's hooked */
+    text-shadow: 0 0 5px var(--neon-green);
+    mix-blend-mode: normal;
+}
+
+/* Jumble Animation */
+@keyframes shake {
+    0% {
+        transform: translate(1px, 1px) rotate(0deg);
+    }
+
+    10% {
+        transform: translate(-1px, -2px) rotate(-1deg);
+    }
+
+    20% {
+        transform: translate(-3px, 0px) rotate(1deg);
+    }
+
+    30% {
+        transform: translate(3px, 2px) rotate(0deg);
+    }
+
+    40% {
+        transform: translate(1px, -1px) rotate(1deg);
+    }
+
+    50% {
+        transform: translate(-1px, 2px) rotate(-1deg);
+    }
+
+    60% {
+        transform: translate(-3px, 1px) rotate(0deg);
+    }
+
+    70% {
+        transform: translate(3px, 1px) rotate(-1deg);
+    }
+
+    80% {
+        transform: translate(-1px, -1px) rotate(1deg);
+    }
+
+    90% {
+        transform: translate(1px, 2px) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(1px, -2px) rotate(-1deg);
+    }
+}
+
+.arcade-word.shake {
+    animation: shake 0.5s;
+    animation-iteration-count: infinite;
+}
+
+/* Word Drop Gravity Animation */
+.arcade-word.falling {
+    transition: top 1s cubic-bezier(0.5, 0, 1, 1);
+    /* fake gravity ease-in */
+}
+
+/* Prize Chute */
+.prize-chute {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 100px;
+    height: 80px;
+    border: 3px solid #555;
+    background: #111;
+    z-index: 2;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    box-shadow: inset 0 20px 20px rgba(0, 0, 0, 0.8);
+}
+
+.chute-hole {
+    width: 80%;
+    height: 40px;
+    background: #000;
+    border-radius: 20px 20px 0 0;
+    margin-bottom: 5px;
+}
+
+.chute-label {
+    font-family: var(--font-arcade);
+    color: var(--arcade-orange);
+    font-size: 0.7rem;
+    margin-bottom: 5px;
+    text-shadow: 0 0 5px var(--arcade-orange);
+}
+
+/* Arcade Controls */
+.arcade-controls {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+}
+
+.joystick-hint {
+    color: var(--text-dim);
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.arcade-btn {
+    appearance: none;
+    border: none;
+    background: var(--neon-pink);
+    color: #fff;
+    font-family: var(--font-arcade);
+    font-weight: 900;
+    font-size: 1.2rem;
+    padding: 10px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #9e004f, 0 10px 10px rgba(0, 0, 0, 0.5), inset 0 2px 5px rgba(255, 255, 255, 0.5);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    transition: all 0.1s;
+}
+
+.arcade-btn:active {
+    transform: translateY(5px);
+    box-shadow: 0 0 0 #9e004f, 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 4px 10px rgba(0, 0, 0, 0.8);
+}
+
+/* --- Poetry Terminal (Right) --- */
+.comp-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 243, 255, 0.3);
+}
+
+.comp-header h2 {
+    font-size: 2rem;
+}
+
+.section-title {
+    font-family: var(--font-arcade);
+    color: var(--neon-blue);
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+}
+
+.inventory-section {
+    margin-bottom: 1.5rem;
+}
+
+.inventory-belt {
+    background: rgba(0, 243, 255, 0.05);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    border-radius: 6px;
+    min-height: 80px;
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 8px;
+    position: relative;
+}
+
+.inventory-hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    pointer-events: none;
+    text-align: center;
+    width: 100%;
+}
+
+.canvas-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    /* Important for flex child to be scrollable if needed */
+}
+
+.composition-board {
+    flex: 1;
+    background-color: #f4ebd8;
+    /* Paperish look but fits dark mode? Let's make it a dark magnetic board instead */
+    background: #1e212b;
+    border: 2px solid var(--neon-blue);
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+    /* subtle grid */
+    background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+/* The poetic words */
+.magnetic-word {
+    display: inline-block;
+    background: #000;
+    color: #fff;
+    padding: 4px 8px;
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    cursor: grab;
+    user-select: none;
+    z-index: 100;
+    box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.8);
+}
+
+.magnetic-word:active {
+    cursor: grabbing;
+    transform: scale(1.05);
+    z-index: 1000;
+    box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.9);
+}
+
+.composition-board .magnetic-word {
+    position: absolute;
+}
+
+/* Trash Zone */
+.trash-zone {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 80px;
+    height: 80px;
+    border: 2px dashed rgba(255, 0, 127, 0.5);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 50;
+}
+
+.trash-icon {
+    font-family: var(--font-arcade);
+    color: rgba(255, 0, 127, 0.5);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.trash-zone.hover {
+    border-color: var(--neon-pink);
+    border-style: solid;
+    background: rgba(255, 0, 127, 0.2);
+    box-shadow: 0 0 15px var(--neon-pink);
+}
+
+.trash-zone.hover .trash-icon {
+    color: var(--neon-pink);
+}
+
+.comp-controls {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.comp-btn {
+    background: transparent;
+    border: 1px solid var(--neon-blue);
+    color: var(--neon-blue);
+    padding: 8px 16px;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 4px;
+}
+
+.comp-btn:hover {
+    background: rgba(0, 243, 255, 0.2);
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.4);
+}
