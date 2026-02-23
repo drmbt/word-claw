@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
             "look", "see", "watch", "gaze", "stare", "glance", "peek", "peep", "glimpse", "blind",
             "know", "think", "feel", "believe", "doubt", "hope", "fear", "love", "hate", "desire",
         ],
-        numWords: 150, // Dense pile
+        numWords: 50, // Less dense default
         wordSizeMin: 14,
         wordSizeMax: 32
     };
@@ -58,7 +58,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const clawArm = document.getElementById('claw-arm');
     const clawGrabber = document.getElementById('claw-grabber');
     const btnDrop = document.getElementById('btn-drop');
-    const prizeChute = document.getElementById('prize-chute');
+
+    // Final UX Elements
+    const wordCountEl = document.getElementById('word-count');
+    const winOverlay = document.getElementById('win-overlay');
+    const btnWinRestart = document.getElementById('btn-win-restart');
+    const btnCustom = document.getElementById('btn-custom');
+    const customModal = document.getElementById('custom-text-modal');
+    const btnCancelCustom = document.getElementById('btn-cancel-custom');
+    const btnSubmitCustom = document.getElementById('btn-submit-custom');
+    const customTextInput = document.getElementById('custom-text-input');
 
     const inventoryBelt = document.getElementById('inventory-belt');
 
@@ -180,6 +189,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
             state.gameWords = remainingWords;
+        }
+
+        updateWordCount();
+    }
+
+    function updateWordCount() {
+        const activeWords = state.gameWords.filter(w => w.el.parentElement === wordPit && !w.grabbed && !w.displaced);
+        if (wordCountEl) {
+            wordCountEl.innerText = `WORDS: ${activeWords.length.toString().padStart(3, '0')}`;
+        }
+
+        if (activeWords.length === 0 && !state.grabbedWord) {
+            if (winOverlay) winOverlay.classList.remove('hidden');
         }
     }
 
@@ -467,6 +489,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.grabbedWord.el.remove();
                 state.grabbedWord = null;
                 resetClaw();
+                updateWordCount();
             }, 300);
         } else {
             resetClaw();
@@ -516,25 +539,27 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Alternative simple threshold if flex measuring is finicky
-        // But flex wrap detection is cool. Let's also add a max limit so it jumbles periodically.
+        // But flex wrap detection is cool. Let's also add a max limit so it penalizes periodically.
         if (wrapped || words.length >= 8) {
-            triggerJumbleSequence();
+            triggerInventoryPenalty();
         }
     }
 
-    function triggerJumbleSequence() {
-        // Shake existing words
-        state.gameWords.forEach(w => {
-            if (!w.grabbed && w.el.parentElement === wordPit) {
-                w.el.classList.add('shake');
-                setTimeout(() => {
-                    w.el.classList.remove('shake');
-                }, 1000); // Shake for 1s
-            }
+    function triggerInventoryPenalty() {
+        // Flash penalty
+        inventoryBelt.classList.add('penalty-flash');
+
+        const words = Array.from(inventoryBelt.querySelectorAll('.magnetic-word'));
+        words.forEach(w => {
+            w.style.transition = 'all 0.5s ease-in';
+            w.style.transform = 'scale(0)';
+            w.style.opacity = '0';
+            setTimeout(() => w.remove(), 500);
         });
 
-        // Dump new batch
-        initWords(true);
+        setTimeout(() => {
+            inventoryBelt.classList.remove('penalty-flash');
+        }, 800);
     }
 
     // --- Composition Drag and Drop ---
@@ -641,6 +666,54 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById('btn-export').addEventListener('click', () => {
         alert("Poem Export: Take a screenshot to share your cyberpunk verse!");
+    });
+
+    // Custom Text Modal
+    btnCustom.addEventListener('click', () => {
+        customModal.classList.remove('hidden');
+        customTextInput.focus();
+    });
+
+    btnCancelCustom.addEventListener('click', () => {
+        customModal.classList.add('hidden');
+    });
+
+    btnSubmitCustom.addEventListener('click', () => {
+        const text = customTextInput.value.trim();
+        if (text) {
+            // Parse words, strip punctuation except hyphens/apostrophes
+            const newWords = text.replace(/[^a-zA-Z0-9\s'-]/g, '').split(/\s+/).filter(w => w.length > 0);
+            if (newWords.length > 0) {
+                config.vocab = newWords;
+                config.numWords = newWords.length;
+
+                // Clear pit
+                wordPit.innerHTML = '';
+                state.gameWords = [];
+                initWords();
+
+                // Hide modal
+                customModal.classList.add('hidden');
+                customTextInput.value = '';
+
+                // hide win state just in case
+                winOverlay.classList.add('hidden');
+            }
+        }
+    });
+
+    // Win State Restart
+    btnWinRestart.addEventListener('click', () => {
+        winOverlay.classList.add('hidden');
+        wordPit.innerHTML = '';
+        state.gameWords = [];
+
+        // Reset to default config if empty
+        if (config.vocab.length < 10) {
+            // This case might hit if someone entered a very short text, but let's just 
+            // use whatever the last vocab was.
+        }
+        initWords();
     });
 
 });

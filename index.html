@@ -21,7 +21,10 @@
             <div class="arcade-cabinet">
                 <header class="arcade-header">
                     <h1 class="neon-text pink-glow">WORD CLAW</h1>
-                    <div class="credit-display neon-text blue-glow">INSERT CREDIT TO PLAY</div>
+                    <div class="header-readouts">
+                        <div class="credit-display neon-text blue-glow">INSERT CREDIT</div>
+                        <div class="word-counter neon-text cyan-glow" id="word-count">WORDS: 000</div>
+                    </div>
                 </header>
 
                 <div class="game-window-frame">
@@ -42,12 +45,22 @@
                         <div class="word-pit" id="word-pit">
                             <!-- Words injected dynamically here -->
                         </div>
+
+                        <!-- Win State Overlay -->
+                        <div class="win-overlay hidden" id="win-overlay">
+                            <h2 class="neon-text pink-glow glow-pulse">YOU WIN</h2>
+                            <p>THE PIT IS EMPTY</p>
+                            <button class="arcade-btn" id="btn-win-restart">RESTART</button>
+                        </div>
                     </div>
                 </div>
 
                 <div class="arcade-controls">
+                    <div class="btn-group">
+                        <button class="arcade-btn drop-btn" id="btn-drop">DROP CLAW [SPACE]</button>
+                        <button class="arcade-btn custom-btn" id="btn-custom">CUSTOM TEXT</button>
+                    </div>
                     <div class="joystick-hint">◀ MOUSE OR A/D TO MOVE ▶</div>
-                    <button class="arcade-btn drop-btn" id="btn-drop">DROP CLAW [SPACE]</button>
                     <div class="keyboard-hints">
                         <span>[TAB] to SELECT INVENTORY • [ENTER] to PLACE WORD</span>
                     </div>
@@ -86,6 +99,19 @@
             </div>
         </section>
 
+    </div>
+
+    <!-- Custom Text Modal -->
+    <div id="custom-text-modal" class="modal-backdrop hidden">
+        <div class="modal-content arcade-cabinet">
+            <h2 class="neon-text blue-glow">LOAD CUSTOM TEXT</h2>
+            <p>Paste a poem, article, or any text here.<br>The claw will crush it into playable words.</p>
+            <textarea id="custom-text-input" placeholder="Type or paste words here..."></textarea>
+            <div class="modal-actions">
+                <button class="arcade-btn" id="btn-cancel-custom">CANCEL</button>
+                <button class="arcade-btn" id="btn-submit-custom">LOAD WORDS</button>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
