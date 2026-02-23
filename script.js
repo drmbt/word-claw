@@ -269,6 +269,11 @@ document.addEventListener("DOMContentLoaded", () => {
             if (document.activeElement && document.activeElement.classList.contains('magnetic-word')) {
                 return; // let the word handle it
             }
+            // Allow normal typing in the custom text textarea
+            if (document.activeElement && document.activeElement.tagName === 'TEXTAREA') {
+                return;
+            }
+
             e.preventDefault(); // stop scrolling
             handleClawTrigger();
         }
