@@ -260,9 +260,6 @@ document.addEventListener("DOMContentLoaded", () => {
         let bestCandidate = null;
         let minDist = 9999;
 
-        const impactRadius = 150; // Radius within which words will scatter
-        const maxScatterForce = 60; // Max pixels to push a word
-
         state.gameWords.forEach(w => {
             if (w.grabbed) return;
             const wRect = w.el.getBoundingClientRect();
@@ -282,42 +279,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     minDist = dist;
                     bestCandidate = w;
                 }
-            }
-
-            // 2. Apply Scatter Physics to all words in radius (including the one about to be grabbed, which we'll pull back later if needed, but easier to just apply to all then override grabbed obj)
-            if (dist < impactRadius && dist > 0) {
-                // Calculate push vector
-                const angle = Math.atan2(wCenterY - clawGrabY, wCenterX - clawGrabX);
-                // Inverse distance force (closer words get pushed more)
-                const force = maxScatterForce * (1 - (dist / impactRadius));
-
-                // Add jitter to scattering
-                const jitterRot = (Math.random() - 0.5) * 90;
-                w.rot += jitterRot;
-
-                // Calculate new position
-                let newX = w.x + Math.cos(angle) * force;
-                let newY = w.y + Math.sin(angle) * force;
-
-                // Keep within pit bounds
-                if (newX < 0) newX = 0;
-                if (newX > pitRect.width - w.w) newX = pitRect.width - w.w;
-                if (newY < 0) newY = 0;
-                if (newY > pitRect.height - w.h) newY = pitRect.height - w.h;
-
-                w.x = newX;
-                w.y = newY;
-
-                // Apply visual transition
-                w.el.style.transition = 'left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), top 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s ease-out';
-                w.el.style.left = `${w.x}px`;
-                w.el.style.top = `${w.y}px`;
-                w.el.style.transform = `rotate(${w.rot}deg)`;
-
-                // Clean up transition so it doesn't mess with purely draggable logic later or future updates
-                setTimeout(() => {
-                    if (w.el) w.el.style.transition = 'none';
-                }, 400);
             }
         });
 
@@ -352,12 +313,12 @@ document.addEventListener("DOMContentLoaded", () => {
         function updateGrabbedPos(timestamp) {
             if (!start) start = timestamp;
             if (state.clawMode === 'retracting') {
+                const currentArmH = clawArm.getBoundingClientRect().height;
+                const grabCenterY = 10 + currentArmH + 20;
+                const grabCenterX = state.clawX;
+
                 if (state.grabbedWord) {
                     const pitRelTop = wordPit.offsetTop;
-                    // Read actual bounding rect height during transition
-                    const currentArmH = clawArm.getBoundingClientRect().height;
-                    const grabCenterY = 10 + currentArmH + 20;
-                    const grabCenterX = state.clawX;
 
                     const wY = grabCenterY - pitRelTop - (state.grabbedWord.h / 2);
                     const wX = grabCenterX - (state.grabbedWord.w / 2);
@@ -365,6 +326,66 @@ document.addEventListener("DOMContentLoaded", () => {
                     state.grabbedWord.el.style.left = `${wX}px`;
                     state.grabbedWord.el.style.top = `${wY}px`;
                 }
+
+                // Displacement Physics during retraction
+                const impactRadius = 60; // How close a word needs to be to the rising claw
+                const pushForceY = -120; // Pop up height
+                const pushForceX = 80;   // Pop sideways
+
+                state.gameWords.forEach(w => {
+                    if (w === state.grabbedWord || w.grabbed || w.displaced) return;
+
+                    // Use resting coords or approximate
+                    const wCenterX = w.x + w.w / 2;
+                    const wCenterY = w.y + w.h / 2;
+
+                    // We compare against the center of the grabber assembly
+                    const pitRelTop = wordPit.offsetTop;
+                    const grabAbsoluteY = grabCenterY - pitRelTop;
+
+                    const dx = Math.abs(wCenterX - grabCenterX);
+                    const dy = Math.abs(wCenterY - grabAbsoluteY);
+
+                    // Check if rising claw/word intersects this word
+                    if (dx < w.w / 2 + 30 && dy < w.h / 2 + 30 && wCenterY < grabAbsoluteY + 50) {
+                        w.displaced = true;
+
+                        const dirX = (wCenterX > grabCenterX) ? 1 : -1;
+                        const pushX = dirX * (Math.random() * pushForceX + 20);
+                        const pushY = pushForceY - Math.random() * 40;
+
+                        const origY = w.y;
+                        w.x += pushX;
+                        // Keep in bounds
+                        if (w.x < 0) w.x = 0;
+                        if (w.x > pitRect.width - w.w) w.x = pitRect.width - w.w;
+
+                        // ARC UP: cubic-bezier(0.25, 1, 0.5, 1) = ease-out for throwing up
+                        w.el.style.transition = 'left 0.3s ease-out, top 0.3s cubic-bezier(0.25, 1, 0.5, 1), transform 0.3s ease-out';
+                        w.el.style.left = `${w.x}px`;
+                        w.el.style.top = `${origY + pushY}px`;
+
+                        const jitterRot = (Math.random() - 0.5) * 120;
+                        w.rot += jitterRot;
+                        w.el.style.transform = `rotate(${w.rot}deg)`;
+
+                        // FALL DOWN: cubic-bezier(0.5, 0, 1, 1) = ease-in for gravity
+                        setTimeout(() => {
+                            if (w.el) {
+                                w.el.style.transition = 'top 0.5s cubic-bezier(0.5, 0, 1, 1)';
+                                w.el.style.top = `${origY}px`;
+
+                                setTimeout(() => {
+                                    if (w.el) {
+                                        w.el.style.transition = 'none';
+                                        w.displaced = false; // can be displaced again later
+                                    }
+                                }, 500);
+                            }
+                        }, 300);
+                    }
+                });
+
                 requestAnimationFrame(updateGrabbedPos);
             }
         }
