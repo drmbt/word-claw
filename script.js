@@ -83,13 +83,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // --- Initialization & Physics Piling ---
-    function initWords(addMore = false) {
+    function initWords(addMore = false, explicitAmount = null) {
         if (!addMore) {
             wordPit.innerHTML = '';
             state.gameWords = [];
         }
 
-        const dumpAmount = addMore ? 50 : config.numWords;
+        const dumpAmount = explicitAmount !== null ? explicitAmount : (addMore ? 50 : config.numWords);
 
         for (let i = 0; i < dumpAmount; i++) {
             const wordText = config.vocab[Math.floor(Math.random() * config.vocab.length)];
@@ -519,48 +519,51 @@ document.addEventListener("DOMContentLoaded", () => {
         inventoryBelt.appendChild(magWord);
         setupDragAndDrop(magWord);
 
-        checkInventoryRowWrap();
+        checkInventoryCapacity();
     }
 
-    // Check if the flexbox wrapped to a second line
-    function checkInventoryRowWrap() {
-        const words = Array.from(inventoryBelt.querySelectorAll('.magnetic-word'));
-        if (words.length < 2) return;
+    // Limit to 8 words. Shift background color based on length.
+    // If > 8, delete oldest (index 0), shift rest over, and refill pit.
+    function checkInventoryCapacity() {
+        let words = Array.from(inventoryBelt.querySelectorAll('.magnetic-word'));
 
-        // Find the top offset of the first word
-        const firstTop = words[0].offsetTop;
-        let wrapped = false;
+        if (words.length > 8) {
+            // Flash penalty alert
+            inventoryBelt.classList.add('penalty-flash');
+            setTimeout(() => inventoryBelt.classList.remove('penalty-flash'), 400);
 
-        for (let i = 1; i < words.length; i++) {
-            // Give a few pixels of leeway, flexbox wrapping usually jumps significantly
-            if (words[i].offsetTop > firstTop + 10) {
-                wrapped = true;
-                break;
-            }
+            // Pop oldest word
+            const oldest = words[0];
+            oldest.style.transition = 'all 0.4s ease-in';
+            oldest.style.transform = 'scale(0)';
+            oldest.style.opacity = '0';
+            setTimeout(() => oldest.remove(), 400);
+
+            words.shift(); // Remove from tracking array
+
+            refillPit();
         }
 
-        // Alternative simple threshold if flex measuring is finicky
-        // But flex wrap detection is cool. Let's also add a max limit so it penalizes periodically.
-        if (wrapped || words.length >= 8) {
-            triggerInventoryPenalty();
-        }
+        // Apply visual capacity class (capacity-0 to capacity-8)
+        inventoryBelt.className = inventoryBelt.className.replace(/\bcapacity-\d+\b/g, '').trim();
+        inventoryBelt.classList.add(`capacity-${words.length}`);
     }
 
-    function triggerInventoryPenalty() {
-        // Flash penalty
-        inventoryBelt.classList.add('penalty-flash');
+    function refillPit() {
+        const activeWords = state.gameWords.filter(w => w.el.parentElement === wordPit && !w.grabbed && !w.displaced);
+        const needed = config.numWords - activeWords.length;
+        if (needed > 0) {
+            // Shake existing words
+            state.gameWords.forEach(w => {
+                if (!w.grabbed && w.el.parentElement === wordPit) {
+                    w.el.classList.add('shake');
+                    setTimeout(() => w.el.classList.remove('shake'), 1000);
+                }
+            });
 
-        const words = Array.from(inventoryBelt.querySelectorAll('.magnetic-word'));
-        words.forEach(w => {
-            w.style.transition = 'all 0.5s ease-in';
-            w.style.transform = 'scale(0)';
-            w.style.opacity = '0';
-            setTimeout(() => w.remove(), 500);
-        });
-
-        setTimeout(() => {
-            inventoryBelt.classList.remove('penalty-flash');
-        }, 800);
+            // Dump new batch
+            initWords(true, needed);
+        }
     }
 
     // --- Composition Drag and Drop ---
