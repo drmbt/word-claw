@@ -83,16 +83,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // --- Initialization & Physics Piling ---
-    function initWords(addMore = false, explicitAmount = null) {
+    function initWords(addMore = false, explicitAmount = null, specificWordsArray = null) {
         if (!addMore) {
             wordPit.innerHTML = '';
             state.gameWords = [];
         }
 
-        const dumpAmount = explicitAmount !== null ? explicitAmount : (addMore ? 50 : config.numWords);
+        const dumpAmount = specificWordsArray ? specificWordsArray.length : (explicitAmount !== null ? explicitAmount : (addMore ? 50 : config.numWords));
 
         for (let i = 0; i < dumpAmount; i++) {
-            const wordText = config.vocab[Math.floor(Math.random() * config.vocab.length)];
+            const wordText = specificWordsArray ? specificWordsArray[i] : config.vocab[Math.floor(Math.random() * config.vocab.length)];
             const el = document.createElement('div');
             el.className = 'arcade-word';
             el.innerText = wordText;
@@ -695,13 +695,11 @@ document.addEventListener("DOMContentLoaded", () => {
             // Parse words, strip punctuation except hyphens/apostrophes
             const newWords = text.replace(/[^a-zA-Z0-9\s'-]/g, '').split(/\s+/).filter(w => w.length > 0);
             if (newWords.length > 0) {
-                config.vocab = newWords;
-                config.numWords = newWords.length;
+                // Append the inserted words into the game's overall vocabulary so they can spawn again if needed
+                config.vocab = config.vocab.concat(newWords);
 
-                // Clear pit
-                wordPit.innerHTML = '';
-                state.gameWords = [];
-                initWords();
+                // Drop the exact submitted words into the pit without clearing existing words
+                initWords(true, null, newWords);
 
                 // Hide panel
                 customPanel.classList.add('hidden');
