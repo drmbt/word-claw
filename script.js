@@ -79,12 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
             state.gameWords = [];
         }
 
-        // Define exclusion zone for chute (bottom left)
-        const chuteExclusion = {
-            right: 150, // width in px to avoid safely from left edge
-            topFromBottom: 150 // height from bottom
-        };
-
         const dumpAmount = addMore ? 50 : config.numWords;
 
         for (let i = 0; i < dumpAmount; i++) {
@@ -127,12 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 y = pitRect.height - y - rect.height; // Invert to put at bottom
                 if (y < 0) y = 0;
 
-                // Check Chute Exclusion Zone
-                const inExclusionZone = (x < chuteExclusion.right) && ((pitRect.height - y) < chuteExclusion.topFromBottom);
-
-                if (!inExclusionZone) {
-                    validPlacement = true;
-                }
+                validPlacement = true;
                 attempts++;
             }
             // Fallback if loop finishes without valid
@@ -320,7 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let start = null;
         function updateGrabbedPos(timestamp) {
             if (!start) start = timestamp;
-            if (state.clawMode === 'retracting' || state.clawMode === 'returning') {
+            if (state.clawMode === 'retracting') {
                 if (state.grabbedWord) {
                     const pitRelTop = wordPit.offsetTop;
                     // Read actual bounding rect height during transition
@@ -340,32 +329,16 @@ document.addEventListener("DOMContentLoaded", () => {
         requestAnimationFrame(updateGrabbedPos);
 
         setTimeout(() => {
-            returnToChute();
+            extractGrabbedWord();
         }, duration + 50);
     }
 
-    function returnToChute() {
-        state.clawMode = 'returning';
-        const chuteRelX = 80; // center of chute roughly
-
-        const dist = Math.abs(state.clawX - chuteRelX);
-        const duration = Math.max(500, dist * 2);
-
-        clawCarriage.style.transition = `left ${duration}ms ease-in-out`;
-        clawCarriage.style.left = `${chuteRelX}px`;
-        state.clawX = chuteRelX;
-
-        setTimeout(() => {
-            dropToChute();
-        }, duration + 100);
-    }
-
-    function dropToChute() {
+    function extractGrabbedWord() {
         clawGrabber.classList.remove('closed');
         if (state.grabbedWord) {
-            state.grabbedWord.el.style.transition = 'all 0.4s ease-in';
-            state.grabbedWord.el.style.top = `${wordPit.offsetHeight + 100}px`;
-            state.grabbedWord.el.style.transform += ' scale(0.1) rotate(180deg)';
+            // Animate it scaling out instead of dropping
+            state.grabbedWord.el.style.transition = 'all 0.3s ease-in';
+            state.grabbedWord.el.style.transform += ' scale(2)';
             state.grabbedWord.el.style.opacity = '0';
 
             setTimeout(() => {
@@ -373,7 +346,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.grabbedWord.el.remove();
                 state.grabbedWord = null;
                 resetClaw();
-            }, 400);
+            }, 300);
         } else {
             resetClaw();
         }
