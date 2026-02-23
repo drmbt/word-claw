@@ -46,6 +46,7 @@ section {
     display: flex;
     flex-direction: column;
     padding: 1.5rem;
+    min-height: 0;
 }
 
 .arcade-panel {
@@ -92,6 +93,7 @@ section {
     padding: 1rem;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0, 0, 0, 0.5);
     position: relative;
+    min-height: 0;
 }
 
 .arcade-header {
@@ -138,6 +140,7 @@ section {
 
 .game-window-frame {
     flex: 1;
+    min-height: 0;
     border: 8px solid #333;
     border-radius: 8px;
     background-color: #000;
@@ -393,6 +396,7 @@ section {
     display: flex;
     gap: 1rem;
     width: 100%;
+    max-width: 400px;
 }
 
 .joystick-hint {
@@ -416,7 +420,72 @@ section {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     transition: all 0.1s;
     flex: 1;
-    /* Added for btn-group */
+}
+
+.arcade-btn.small-btn {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+}
+
+/* Custom Text Collapsible */
+.custom-text-collapsible {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 400px;
+}
+
+.custom-toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--neon-blue);
+    font-family: var(--font-arcade);
+    font-size: 0.7rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.7;
+    margin-top: 5px;
+}
+
+.custom-toggle-btn:hover {
+    opacity: 1;
+    color: var(--neon-pink);
+    text-shadow: 0 0 5px var(--neon-pink);
+}
+
+.custom-text-panel {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: #0a0a0f;
+    border: 1px solid #333;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.custom-text-panel.hidden {
+    display: none;
+}
+
+.custom-text-panel textarea {
+    width: 100%;
+    height: 60px;
+    background: #000;
+    color: var(--text-light);
+    border: 1px solid var(--neon-blue);
+    padding: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    resize: none;
+    outline: none;
+}
+
+.custom-text-panel textarea:focus {
+    box-shadow: inset 0 0 10px rgba(0, 243, 255, 0.2);
 }
 
 .arcade-btn:active {
@@ -441,9 +510,10 @@ section {
 
 /* --- Poetry Terminal (Right) --- */
 .comp-header {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
     border-bottom: 1px solid rgba(0, 243, 255, 0.3);
+    flex: 0 0 auto;
 }
 
 .comp-header h2 {
@@ -459,7 +529,8 @@ section {
 }
 
 .inventory-section {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    flex: 0 0 auto;
 }
 
 .inventory-belt {
@@ -515,6 +586,7 @@ section {
     /* subtle grid */
     background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
     background-size: 20px 20px;
+    min-height: 0;
 }
 
 /* The poetic words */
@@ -582,6 +654,7 @@ section {
     display: flex;
     gap: 1rem;
     justify-content: flex-end;
+    flex: 0 0 auto;
 }
 
 .comp-btn {

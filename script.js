@@ -63,9 +63,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const wordCountEl = document.getElementById('word-count');
     const winOverlay = document.getElementById('win-overlay');
     const btnWinRestart = document.getElementById('btn-win-restart');
-    const btnCustom = document.getElementById('btn-custom');
-    const customModal = document.getElementById('custom-text-modal');
-    const btnCancelCustom = document.getElementById('btn-cancel-custom');
+
+    // Custom Text UI
+    const btnToggleCustom = document.getElementById('btn-toggle-custom');
+    const customPanel = document.getElementById('custom-text-panel');
     const btnSubmitCustom = document.getElementById('btn-submit-custom');
     const customTextInput = document.getElementById('custom-text-input');
 
@@ -668,14 +669,16 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Poem Export: Take a screenshot to share your cyberpunk verse!");
     });
 
-    // Custom Text Modal
-    btnCustom.addEventListener('click', () => {
-        customModal.classList.remove('hidden');
-        customTextInput.focus();
-    });
-
-    btnCancelCustom.addEventListener('click', () => {
-        customModal.classList.add('hidden');
+    // Custom Text Toggle
+    btnToggleCustom.addEventListener('click', () => {
+        if (customPanel.classList.contains('hidden')) {
+            customPanel.classList.remove('hidden');
+            customTextInput.focus();
+            btnToggleCustom.innerText = '▲ HIDE CUSTOM TEXT ▲';
+        } else {
+            customPanel.classList.add('hidden');
+            btnToggleCustom.innerText = '▼ LOAD CUSTOM TEXT ▼';
+        }
     });
 
     btnSubmitCustom.addEventListener('click', () => {
@@ -692,8 +695,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.gameWords = [];
                 initWords();
 
-                // Hide modal
-                customModal.classList.add('hidden');
+                // Hide panel
+                customPanel.classList.add('hidden');
+                btnToggleCustom.innerText = '▼ LOAD CUSTOM TEXT ▼';
                 customTextInput.value = '';
 
                 // hide win state just in case

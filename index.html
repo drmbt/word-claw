@@ -56,13 +56,21 @@
                 </div>
 
                 <div class="arcade-controls">
+                    <div class="joystick-hint">◀ MOUSE OR A/D TO MOVE ▶</div>
                     <div class="btn-group">
                         <button class="arcade-btn drop-btn" id="btn-drop">DROP CLAW [SPACE]</button>
-                        <button class="arcade-btn custom-btn" id="btn-custom">CUSTOM TEXT</button>
                     </div>
-                    <div class="joystick-hint">◀ MOUSE OR A/D TO MOVE ▶</div>
+
+                    <div class="custom-text-collapsible">
+                        <button class="custom-toggle-btn" id="btn-toggle-custom">▼ LOAD CUSTOM TEXT ▼</button>
+                        <div id="custom-text-panel" class="custom-text-panel hidden">
+                            <textarea id="custom-text-input" placeholder="Paste poem or text here..."></textarea>
+                            <button class="arcade-btn small-btn" id="btn-submit-custom">INJECT</button>
+                        </div>
+                    </div>
+
                     <div class="keyboard-hints">
-                        <span>[TAB] to SELECT INVENTORY • [ENTER] to PLACE WORD</span>
+                        <span>[TAB] to SELECT INVENTORY • [ENTER] to PLACE</span>
                     </div>
                 </div>
             </div>
@@ -99,19 +107,6 @@
             </div>
         </section>
 
-    </div>
-
-    <!-- Custom Text Modal -->
-    <div id="custom-text-modal" class="modal-backdrop hidden">
-        <div class="modal-content arcade-cabinet">
-            <h2 class="neon-text blue-glow">LOAD CUSTOM TEXT</h2>
-            <p>Paste a poem, article, or any text here.<br>The claw will crush it into playable words.</p>
-            <textarea id="custom-text-input" placeholder="Type or paste words here..."></textarea>
-            <div class="modal-actions">
-                <button class="arcade-btn" id="btn-cancel-custom">CANCEL</button>
-                <button class="arcade-btn" id="btn-submit-custom">LOAD WORDS</button>
-            </div>
-        </div>
     </div>
 
     <script src="script.js"></script>
