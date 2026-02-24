@@ -3,6 +3,7 @@ version: '3.8'
 services:
   word-claw:
     build: .
+    restart: unless-stopped
     ports:
       - "${PORT:-1010}:1010"
     volumes:
