@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const fallbackVocab = [
         "the", "a", "an", "and", "but", "or", "in", "of", "to", "with", "from", "by", "on", "as", "at",
+        "ed", "ing", "'s", "ly", "re", "ve", "I'm", "you're", "it's", "he's", "she's", "we're", "they're", "can't", "don't", "won't",
         "neon", "cyber", "synth", "grid", "wire", "chrome", "data", "byte", "glitch", "system", "machine",
         "love", "death", "blood", "ghost", "shell", "soul", "heart", "mind", "memory", "night", "day", "sun",
         "moon", "star", "planet", "world", "earth", "sky", "cloud", "rain", "snow", "ice", "frost", "winter"

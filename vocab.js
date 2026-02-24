@@ -7,6 +7,10 @@ module.exports = [
     "this", "that", "these", "those", "who", "whom", "whose", "which", "what", "how", "why", "when", "where",
     "not", "no", "yes", "always", "never", "forever", "today", "tomorrow", "yesterday", "now", "then", "soon", "late", "early",
 
+    // Utilities & Conjunctions / Affixes
+    "ed", "ing", "'s", "ly", "re", "ve", "un", "re", "dis", "pre", "anti", "pro",
+    "I'm", "you're", "it's", "he's", "she's", "we're", "they're", "can't", "don't", "won't", "isn't", "aren't", "wasn't", "weren't",
+
     // Cyberpunk & Sci-Fi
     "neon", "cyber", "synth", "grid", "wire", "chrome", "data", "byte", "glitch", "system", "machine", "ghost", "shell",
     "terminal", "code", "hacker", "network", "matrix", "nexus", "deck", "jack", "plug", "socket", "circuit", "silicon",
