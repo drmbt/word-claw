@@ -1,5 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    const fallbackVocab = [
+        "the", "a", "an", "and", "but", "or", "in", "of", "to", "with", "from", "by", "on", "as", "at",
+        "neon", "cyber", "synth", "grid", "wire", "chrome", "data", "byte", "glitch", "system", "machine",
+        "love", "death", "blood", "ghost", "shell", "soul", "heart", "mind", "memory", "night", "day", "sun",
+        "moon", "star", "planet", "world", "earth", "sky", "cloud", "rain", "snow", "ice", "frost", "winter"
+    ];
+
     // --- Config & State ---
     const config = {
         wordSizeMin: 18,
@@ -7,8 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
         gravity: 0.8,
         bounce: 0.4,
         maxClawSpeed: 5,
-        numWords: 50, // Will be overridden by API
-        vocab: ["initializing", "connection..."] // Will be overridden by API
+        numWords: 50,
+        vocab: fallbackVocab // Default if API fails
     };
 
     const state = {
@@ -695,14 +702,24 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Dynamic Initialization ---
     async function loadConfigAndStart() {
         try {
-            const res = await fetch('/api/config');
+            // Using a short timeout incase the server isn't running to prevent long hangups
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+            const res = await fetch('/api/config', { signal: controller.signal });
+            clearTimeout(timeoutId);
+
             if (res.ok) {
                 const data = await res.json();
-                config.vocab = data.wordList;
-                config.numWords = data.maxWordCount;
+                if (data.wordList && data.wordList.length > 0) {
+                    config.vocab = data.wordList;
+                }
+                if (data.maxWordCount) {
+                    config.numWords = data.maxWordCount;
+                }
             }
         } catch (e) {
-            console.warn("Could not load backend config, using defaults", e);
+            console.warn("Could not load backend config, using local fallback vocab", e);
         }
 
         // Start game
