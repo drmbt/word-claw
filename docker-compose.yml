@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  word-claw:
+    build: .
+    ports:
+      - "${PORT:-1010}:1010"
+    volumes:
+      # Map the expected configs
+      - /mars/config/word-claw:/mars/config/word-claw
+    environment:
+      - ENV_FILE_PATH=/mars/config/word-claw/.env
+      - PORT=1010

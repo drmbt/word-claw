@@ -2,42 +2,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Config & State ---
     const config = {
-        vocab: [
-            // Articles & Conjunctions
-            "the", "a", "an", "and", "but", "or", "so", "yet", "for", "nor",
-            "in", "of", "to", "with", "from", "by", "on", "as", "at", "into",
-            "like", "over", "after", "through", "beneath", "among", "beyond", "upon",
-            // Pronouns
-            "I", "you", "he", "she", "it", "we", "they", "me", "him", "her", "us", "them",
-            "my", "your", "his", "its", "our", "their", "mine", "yours", "theirs",
-            "who", "whom", "whose", "which", "that", "this", "these", "those",
-            // Prefixes / Suffixes
-            "un-", "re-", "in-", "im-", "dis-", "en-", "non-", "pre-", "pro-",
-            "-ing", "-ed", "-s", "-es", "-ly", "-ful", "-less", "-ness", "-ment", "-tion", "-ity",
-            // Nouns
-            "night", "blood", "bone", "ghost", "star", "sea", "wind", "shadow", "heart", "soul",
-            "fire", "water", "earth", "sky", "tree", "leaf", "bird", "wing", "feather", "stone",
-            "iron", "gold", "silver", "glass", "mirror", "dream", "sleep", "death", "life", "time",
-            "memory", "silence", "voice", "word", "song", "breath", "flesh", "skin", "eye", "hand",
-            "face", "mouth", "lip", "tooth", "tongue", "tear", "smile", "laugh", "cry", "sob",
-            "sun", "moon", "cloud", "rain", "snow", "ice", "frost", "winter", "summer", "spring",
-            "autumn", "day", "hour", "minute", "second", "year", "century", "eternity", "moment",
-            // Adjectives
-            "dark", "light", "cold", "hot", "warm", "cool", "deep", "shallow", "high", "low",
-            "far", "near", "wide", "narrow", "long", "short", "heavy", "light", "hard", "soft",
-            "sharp", "dull", "rough", "smooth", "sweet", "sour", "bitter", "salty", "fresh", "stale",
-            "bright", "dim", "faint", "clear", "cloudy", "blind", "deaf", "mute", "old", "young",
-            "new", "ancient", "eternal", "immortal", "mortal", "dead", "alive", "living", "dying",
-            // Verbs
-            "is", "are", "am", "was", "were", "be", "been", "being", "have", "has", "had", "having",
-            "do", "does", "did", "doing", "will", "would", "shall", "should", "can", "could", "may", "might", "must",
-            "go", "come", "run", "walk", "fly", "swim", "crawl", "climb", "fall", "rise", "stand", "sit", "lie",
-            "look", "see", "watch", "gaze", "stare", "glance", "peek", "peep", "glimpse", "blind",
-            "know", "think", "feel", "believe", "doubt", "hope", "fear", "love", "hate", "desire",
-        ],
-        numWords: 50, // Less dense default
-        wordSizeMin: 14,
-        wordSizeMax: 32
+        wordSizeMin: 18,
+        wordSizeMax: 60,
+        gravity: 0.8,
+        bounce: 0.4,
+        maxClawSpeed: 5,
+        numWords: 50, // Will be overridden by API
+        vocab: ["initializing", "connection..."] // Will be overridden by API
     };
 
     const state = {
@@ -206,7 +177,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    initWords();
 
     // --- Claw Controls ---
     let keysDown = {};
@@ -718,12 +688,26 @@ document.addEventListener("DOMContentLoaded", () => {
         wordPit.innerHTML = '';
         state.gameWords = [];
 
-        // Reset to default config if empty
-        if (config.vocab.length < 10) {
-            // This case might hit if someone entered a very short text, but let's just 
-            // use whatever the last vocab was.
-        }
+        // Use whatever the last vocab was.
         initWords();
     });
 
+    // --- Dynamic Initialization ---
+    async function loadConfigAndStart() {
+        try {
+            const res = await fetch('/api/config');
+            if (res.ok) {
+                const data = await res.json();
+                config.vocab = data.wordList;
+                config.numWords = data.maxWordCount;
+            }
+        } catch (e) {
+            console.warn("Could not load backend config, using defaults", e);
+        }
+
+        // Start game
+        initWords();
+    }
+
+    loadConfigAndStart();
 });
